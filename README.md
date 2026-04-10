@@ -1,68 +1,68 @@
-# MedPlan - Healthcare Planning System
+# MedPlan - Système de Planification de Santé
 
-MedPlan is a comprehensive healthcare staff planning and management application designed to handle complex hospital constraints, certifications, and contractual obligations.
+MedPlan est une application complète de planification et de gestion du personnel de santé, conçue pour gérer les contraintes hospitalières complexes, les certifications et les obligations contractuelles.
 
-## 🏥 Core Features
+## 🏥 Fonctionnalités Clés
 
-- **Advanced Planning**: Create and manage hospital shifts across different services and care units.
-- **Intelligent Assignments**: Automated validation of "hard constraints" (overlapping shifts, minimum rest time, workload quotas).
-- **Staff Management**: Full profiles for caregivers including dynamic status (Active, Inactive, Absent).
-- **Certification System**: Track staff certifications with expiration alerts and enforce mandatory certification requirements for specific shifts (e.g., Resuscitation).
-- **Contract Management**: Define contract types (CDI, CDD, Interim) and manage individual contracts to ensure legal compliance during scheduling.
-- **Service & Care Unit Hierarchy**: Organize the hospital into Services (Emergency, Cardiology, etc.) with specific capacities and managers.
-- **Modern UI**: Fully responsive interface with a working Light/Dark theme toggle using semantic styling.
+- **Planification Avancée** : Créez et gérez les roulements (shifts) hospitaliers à travers différents services et unités de soins.
+- **Assignations Intelligentes** : Validation automatisée des "contraintes fortes" (chevauchements d'horaires, temps de repos minimum, quotas de charge de travail).
+- **Gestion du Personnel** : Profils complets des soignants incluant un statut dynamique (Actif, Inactif, Absent).
+- **Système de Certification** : Suivi des certifications du personnel avec alertes d'expiration et application des certifications obligatoires pour des shifts spécifiques (ex: Réanimation).
+- **Gestion des Contrats** : Définition des types de contrats (CDI, CDD, Intérim) et gestion des contrats individuels pour assurer la conformité légale lors de la planification.
+- **Hiérarchie des Services et Unités** : Organisation de l'hôpital en Services (Urgences, Cardiologie, etc.) avec capacités spécifiques et gestionnaires.
+- **Interface Moderne** : Interface entièrement responsive avec un mode Clair/Sombre fonctionnel utilisant un stylisage sémantique.
 
-## 🏗️ Project Structure
+## 🏗️ Structure du Projet
 
 ```text
 healthcare-planning/
-├── backend/                # Django REST Framework API
-│   ├── backend/            # Project configuration (settings, urls)
-│   ├── planning/           # Main application logic
-│   └── requirements.txt    # Python dependencies
+├── backend/                # API Django REST Framework
+│   ├── backend/            # Configuration du projet (settings, urls)
+│   ├── planning/           # Logique métier principale
+│   └── requirements.txt    # Dépendances Python
 ├── frontend/               # React (Create React App)
 │   ├── src/
-│   │   ├── components/     # UI Components (List, Details, Modals)
-│   │   ├── services/       # Axios API client
-│   │   ├── contexts/       # Theme & Notification state management
-│   │   └── index.css       # Global styles & theme variables
-└── .gitignore              # Repository ignore rules
+│   │   ├── components/     # Composants UI (Listes, Détails, Modals)
+│   │   ├── services/       # Client API Axios
+│   │   ├── contexts/       # Gestion d'état (Thème & Notifications)
+│   │   └── index.css       # Styles globaux et variables de thème
+└── .gitignore              # Règles d'exclusion Git
 ```
 
-## 🛠️ Tech Stack
+## 🛠️ Stack Technique
 
 ### Backend (Python/Django)
-- **Django 6.0**: Core framework.
-- **Django REST Framework**: API development.
-- **Django CORS Headers**: Cross-origin resource sharing.
-- **Validation Engine**: Custom logic for healthcare-specific constraints.
+- **Django 6.0** : Framework principal.
+- **Django REST Framework** : Développement de l'API.
+- **Django CORS Headers** : Gestion du partage de ressources cross-origin.
+- **Moteur de Validation** : Logique personnalisée pour les contraintes spécifiques à la santé.
 
 ### Frontend (React)
-- **React 18**: UI Library.
-- **Tailwind CSS**: Utility-first styling with custom semantic variables.
-- **Lucide React**: Icon set.
-- **Axios**: API communication.
-- **React Router DOM**: Navigation.
+- **React 18** : Bibliothèque UI.
+- **Tailwind CSS** : Stylisage utilitaire avec variables sémantiques personnalisées.
+- **Lucide React** : Jeu d'icônes.
+- **Axios** : Communication API.
+- **React Router DOM** : Navigation.
 
-## 🚀 Getting Started
+## 🚀 Mise en Route
 
-### Backend Setup
-1. Create a virtual environment: `python -m venv venv`
-2. Activate the environment: `.\venv\Scripts\activate` (Windows) or `source venv/bin/activate` (Linux/Mac)
-3. Install dependencies: `pip install -r backend/requirements.txt`
-4. **Environment Variables**: Copy `.env.example` to `.env` and update the values (database password, secret key, etc.).
-5. Run migrations: `python backend/manage.py migrate`
-5. (Optional) Seed data: `python backend/manage.py seed_data`
-6. Start server: `python backend/manage.py runserver`
+### Configuration du Backend
+1. Créez un environnement virtuel : `python -m venv venv`
+2. Activez l'environnement : `.\venv\Scripts\activate` (Windows) ou `source venv/bin/activate` (Linux/Mac)
+3. Installez les dépendances : `pip install -r backend/requirements.txt`
+4. **Variables d'Environnement** : Copiez `.env.example` vers `.env` et mettez à jour les valeurs (mot de passe base de données, clé secrète, etc.).
+5. Lancez les migrations : `python backend/manage.py migrate`
+6. (Optionnel) Données de test : `python backend/manage.py seed_data`
+7. Démarrez le serveur : `python backend/manage.py runserver`
 
-### Frontend Setup
-1. Navigate to directory: `cd frontend`
-2. Install dependencies: `npm install`
-3. Start application: `npm start`
+### Configuration du Frontend
+1. Allez dans le répertoire : `cd frontend`
+2. Installez les dépendances : `npm install`
+3. Démarrez l'application : `npm start`
 
-## 🔒 Business Rules (Validators)
-The system enforces several critical rules during assignment:
-1. **No Overlaps**: A caregiver cannot be in two places at once.
-2. **Active Contract**: Requires a valid contract for the date of the shift.
-3. **Certifications**: Must possess all non-expired certifications required by the shift.
-4. **Availability**: Cannot be assigned during a declared absence.
+## 🔒 Règles Métier (Validateurs)
+Le système applique plusieurs règles critiques lors de l'assignation :
+1. **Pas de Chevauchement** : Un soignant ne peut pas être à deux endroits en même temps.
+2. **Contrat Actif** : Nécessite un contrat valide à la date du shift.
+3. **Certifications** : Doit posséder toutes les certifications non expirées requises par le shift.
+4. **Disponibilité** : Ne peut pas être assigné pendant une absence déclarée.
