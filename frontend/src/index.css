@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Light Theme Variables */
+  --color-bg-900: #f8fafc;
+  --color-bg-800: #ffffff;
+  --color-bg-700: #f1f5f9;
+  --color-bg-600: #e2e8f0;
+  --color-bg-500: #cbd5e1;
+  --color-bg-400: #94a3b8;
+  
+  --color-text-main: #020617; /* Slate 950 - almost black */
+  --color-text-muted: #475569; /* Slate 600 */
+  --color-border: #e2e8f0;
+}
+
+.dark {
+  /* Dark Theme Variables */
+  --color-bg-900: #0f0f14;
+  --color-bg-800: #16161d;
+  --color-bg-700: #1e1e27;
+  --color-bg-600: #2a2a36;
+  --color-bg-500: #3a3a4a;
+  --color-bg-400: #4a4a5a;
+
+  --color-text-main: #ffffff;
+  --color-text-muted: #94a3b8;
+  --color-border: #2a2a36;
+}
+
+@layer base {
+  body {
+    @apply bg-dark-900 text-main transition-colors duration-200;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #1e1e27;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #3a3a4a;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out;
+}
+
+.glass {
+  background: rgba(30, 30, 39, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #6366f1 0%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
