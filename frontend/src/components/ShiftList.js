@@ -2,17 +2,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { shiftAPI, referenceAPI } from '../services/api';
-import { Calendar, Filter, Clock, Users, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Calendar, Filter, Clock, Users, CheckCircle, AlertTriangle, Play, Check, X } from 'lucide-react';
 
 function ShiftList() {
   const [shifts, setShifts] = useState([]);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [genResult, setGenResult] = useState(null);
   const [error, setError] = useState(null);
 
   const [filters, setFilters] = useState({
     service: '',
     date_from: new Date().toISOString().split('T')[0],
+    date_to: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // +7 days
   });
 
   useEffect(() => {
@@ -33,6 +36,7 @@ function ShiftList() {
       const params = {};
       if (filters.service) params.service = filters.service;
       if (filters.date_from) params.date_from = filters.date_from;
+      if (filters.date_to) params.date_to = filters.date_to;
 
       const response = await shiftAPI.getAll(params);
       setShifts(response.data);
@@ -47,6 +51,29 @@ function ShiftList() {
   useEffect(() => {
     loadShifts();
   }, [loadShifts]);
+
+  const handleGenerate = async () => {
+    if (!filters.date_from || !filters.date_to) {
+      alert('Veuillez sélectionner une période (du/au)');
+      return;
+    }
+
+    try {
+      setGenerating(true);
+      setGenResult(null);
+      const res = await shiftAPI.generate({
+        start_date: filters.date_from,
+        end_date: filters.date_to,
+        service: filters.service || null
+      });
+      setGenResult(res.data);
+      loadShifts(); // Refresh list
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Erreur lors de la génération');
+    } finally {
+      setGenerating(false);
+    }
+  };
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -80,13 +107,105 @@ function ShiftList() {
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-main flex items-center gap-3">
-          <Calendar className="w-8 h-8 text-cyan-400" />
-          Postes de Garde
-        </h1>
-        <p className="text-muted mt-1">{shifts.length} postes trouvés</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-main flex items-center gap-3">
+            <Calendar className="w-8 h-8 text-cyan-400" />
+            Postes de Garde
+          </h1>
+          <p className="text-muted mt-1">{shifts.length} postes trouvés</p>
+        </div>
+        
+        <button
+          onClick={handleGenerate}
+          disabled={generating}
+          className={`flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold transition-all shadow-lg shadow-primary-500/20 ${
+            generating 
+            ? 'bg-dark-500 text-muted cursor-not-allowed' 
+            : 'bg-gradient-to-r from-primary-600 to-primary-400 text-white hover:scale-105 active:scale-95'
+          }`}
+        >
+          {generating ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Génération en cours...
+            </>
+          ) : (
+            <>
+              <Play className="w-5 h-5 fill-current" />
+              Générer Planning Auto
+            </>
+          )}
+        </button>
       </div>
+
+      {/* Résultat Génération */}
+      {genResult && (
+        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-6 animate-slideDown">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-emerald-500/20 rounded-lg">
+              <Check className="w-6 h-6 text-emerald-400" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-emerald-400">Planning généré avec succès</h3>
+              <p className="text-emerald-400/80 mt-1">{genResult.message}</p>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                <div className="bg-dark-800/50 p-3 rounded-lg border border-emerald-500/20">
+                  <p className="text-xs text-muted uppercase font-bold">Postes Pourvus</p>
+                  <p className="text-xl font-bold text-main">{genResult.stats.assigned}/{genResult.stats.total_shifts}</p>
+                </div>
+                <div className="bg-dark-800/50 p-3 rounded-lg border border-emerald-500/20">
+                  <p className="text-xs text-muted uppercase font-bold">Échecs</p>
+                  <p className="text-xl font-bold text-red-400">{genResult.stats.failed}</p>
+                </div>
+                <div className="bg-dark-800/50 p-3 rounded-lg border border-emerald-500/20">
+                  <p className="text-xs text-muted uppercase font-bold">Score Global</p>
+                  <p className="text-xl font-bold text-amber-400">{genResult.stats.global_score}</p>
+                </div>
+                <div className="bg-dark-800/50 p-3 rounded-lg border border-emerald-500/20">
+                  <p className="text-xs text-muted uppercase font-bold">Qualité Moyenne</p>
+                  <p className="text-xl font-bold text-cyan-400">
+                    {genResult.stats.assigned > 0 
+                      ? Math.max(0, 100 - Math.round(genResult.stats.global_score / genResult.stats.assigned)) 
+                      : 0}%
+                  </p>
+                </div>
+              </div>
+
+              {/* Breakdown */}
+              <div className="mt-4 p-4 bg-dark-800/30 rounded-lg border border-emerald-500/10">
+                <h4 className="text-sm font-bold text-muted uppercase mb-3 border-b border-dark-500 pb-2">Détail des pénalités (Contraintes molles)</h4>
+                <div className="flex flex-wrap gap-6">
+                  <div>
+                    <span className="text-xs text-muted block">Équité (Charge)</span>
+                    <span className="text-lg font-bold text-main">+{genResult.stats.breakdown.workload_equity}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted block">Équité (Week-end)</span>
+                    <span className="text-lg font-bold text-main">+{genResult.stats.breakdown.weekend_equity}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted block">Préférences</span>
+                    <span className="text-lg font-bold text-main">+{genResult.stats.breakdown.preferences}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted block">Fatigue (Nuits)</span>
+                    <span className="text-lg font-bold text-main">+{genResult.stats.breakdown.fatigue}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs text-muted block">Bonus Continuité</span>
+                    <span className="text-lg font-bold text-emerald-400">{genResult.stats.breakdown.continuity_bonus}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button onClick={() => setGenResult(null)} className="text-muted hover:text-main">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Filtres */}
       <div className="bg-dark-700 rounded-xl border border-dark-500 p-6">

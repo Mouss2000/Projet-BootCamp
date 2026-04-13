@@ -23,6 +23,7 @@ from .serializers import (
     PreferenceSerializer, RuleSerializer
 )
 from .validators import validate_assignment
+from .engine import PlanningEngine
 
 
 # ================================================================
@@ -127,6 +128,45 @@ class ShiftViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(start_datetime__date=date_param)
 
         return queryset.order_by('start_datetime')
+
+    @action(detail=False, methods=['post'])
+    def generate(self, request):
+        """
+        Déclenche la génération automatique du planning.
+        """
+        start_date_str = request.data.get('start_date')
+        end_date_str = request.data.get('end_date')
+        service_id = request.data.get('service')
+
+        if not start_date_str or not end_date_str:
+            return Response(
+                {'detail': 'start_date et end_date sont requis (format YYYY-MM-DD)'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response(
+                {'detail': 'Format de date invalide (attendu: YYYY-MM-DD)'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        engine = PlanningEngine(start_date, end_date, service_id)
+        stats = engine.generate()
+
+        if 'error' in stats:
+            return Response(
+                {'detail': stats['error']},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response({
+            'status': 'success',
+            'message': f"Génération terminée : {stats['assigned']} postes pourvus.",
+            'stats': stats
+        })
 
     @action(detail=True, methods=['post'])
     def add_certification(self, request, pk=None):

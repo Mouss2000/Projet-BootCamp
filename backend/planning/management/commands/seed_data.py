@@ -279,7 +279,12 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(' ✓'))
 
         # ===== POSTES DE GARDE =====
-        self.stdout.write('  📅 Création des postes de garde (7 jours)...')
+        self.stdout.write('  🗑️  Nettoyage des anciens postes...')
+        ShiftAssignment.objects.all().delete()
+        Shift.objects.all().delete()
+        self.stdout.write(self.style.SUCCESS(' ✓'))
+
+        self.stdout.write('  📅 Création des postes de garde (14 jours)...')
         matin = ShiftType.objects.get(name='Matin')
         aprem = ShiftType.objects.get(name='Après-midi')
         nuit = ShiftType.objects.get(name='Nuit')
@@ -292,7 +297,7 @@ class Command(BaseCommand):
             care_units['Réanimation-Réanimation'],
         ]
 
-        for i in range(7):  # 7 jours
+        for i in range(14):  # Augmenté à 14 jours
             shift_date = today + timedelta(days=i)
             for unit in units_for_shifts:
                 # Matin 07:00-15:00

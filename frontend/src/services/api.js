@@ -32,6 +32,7 @@ export const shiftAPI = {
   getAvailableStaff: (id) => api.get(`/shifts/${id}/available_staff/`),
   addCertification: (id, certificationId) => api.post(`/shifts/${id}/add_certification/`, { certification_id: certificationId }),
   removeCertification: (id, certificationId) => api.post(`/shifts/${id}/remove_certification/`, { certification_id: certificationId }),
+  generate: (data) => api.post('/shifts/generate/', data),
 };
 
 // ============ AFFECTATIONS ============
